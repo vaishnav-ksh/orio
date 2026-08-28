@@ -4,9 +4,9 @@ An enterprise-grade Product Inventory Management web application built with **Ja
 
 ---
 
-## 🌐 Live Public Demo
-- **Live URL**: **[https://9fc0b2d41ee207.lhr.life](https://9fc0b2d41ee207.lhr.life)**
-- **Local URL**: `http://localhost:8080`
+## 🌐 Live Cloud Production URL (24/7 Online)
+- **Live Production URL**: **[https://orio-x37o.onrender.com](https://orio-x37o.onrender.com)**
+- **Local Dev URL**: `http://localhost:8080`
 
 ---
 

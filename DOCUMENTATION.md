@@ -281,7 +281,7 @@ ORDER BY product_count DESC;
 ---
 
 ## 8. 🚢 DevOps & Deployment
-
+- **Live Production URL**: **[https://orio-x37o.onrender.com](https://orio-x37o.onrender.com)** (Hosted 24/7 on Render.com)
 - **Docker Container**: Multi-stage build (`maven:3.9.9-eclipse-temurin-17-alpine` &rarr; `eclipse-temurin:17-jre-alpine`).
 - **Disk Persistence**: Volume mount `-v ./data:/app/data` ensures zero data loss.
 - **One-Click Commands**:
