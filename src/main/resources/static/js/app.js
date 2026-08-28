@@ -179,7 +179,7 @@ const App = {
                 document.getElementById('kpi-total-products').textContent = data.totalDistinctProducts || 0;
                 document.getElementById('kpi-total-units').textContent = data.totalUnitsInStock || 0;
                 document.getElementById('kpi-low-stock').textContent = (data.lowStockProductCount || 0) + (data.outOfStockProductCount || 0);
-                document.getElementById('kpi-total-valuation').textContent = `$${parseFloat(data.totalInventoryValuation || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                document.getElementById('kpi-total-valuation').textContent = `₹${parseFloat(data.totalInventoryValuation || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
                 const counterElem = document.getElementById('nav-counter-products');
                 if (counterElem) counterElem.textContent = data.totalDistinctProducts || 0;
@@ -253,9 +253,9 @@ const App = {
                         ${p.description ? `<div style="font-size:0.75rem; color:var(--text-muted);">${this.escapeHtml(p.description)}</div>` : ''}
                     </td>
                     <td><span class="category-tag">${this.escapeHtml(p.categoryName || 'General')}</span></td>
-                    <td><strong>$${parseFloat(p.price).toFixed(2)}</strong></td>
+                    <td><strong>₹${parseFloat(p.price).toFixed(2)}</strong></td>
                     <td><strong>${stock}</strong> units</td>
-                    <td>$${parseFloat(itemVal).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                    <td>₹${parseFloat(itemVal).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
                     <td>${statusBadge}</td>
                     <td class="text-right">
                         <div class="table-actions">
@@ -306,7 +306,7 @@ const App = {
                         <div><span class="sku-badge">${this.escapeHtml(i.productSku)}</span></div>
                     </td>
                     <td><span class="category-tag">${this.escapeHtml(i.categoryName || 'General')}</span></td>
-                    <td>$${parseFloat(i.productPrice || 0).toFixed(2)}</td>
+                    <td>₹${parseFloat(i.productPrice || 0).toFixed(2)}</td>
                     <td><strong style="font-size: 1rem;">${stock}</strong></td>
                     <td>Threshold: ${i.lowStockThreshold}</td>
                     <td>${statusBadge}</td>
@@ -465,16 +465,16 @@ const App = {
             const queryId = this.state.activeQuery;
             if (queryId === 'q1') {
                 const res = await API.getAvailableStock();
-                thead.innerHTML = `<tr><th>ID</th><th>SKU</th><th>Product Name</th><th>Category</th><th>Unit Price</th><th>Available Units</th><th>Total Value</th></tr>`;
+                thead.innerHTML = `<tr><th>ID</th><th>SKU</th><th>Product Name</th><th>Category</th><th>Unit Price (₹)</th><th>Available Units</th><th>Total Value (₹)</th></tr>`;
                 tbody.innerHTML = res.data.map(p => `
                     <tr>
                         <td>#${p.id}</td>
                         <td><span class="sku-badge">${this.escapeHtml(p.sku)}</span></td>
                         <td><strong>${this.escapeHtml(p.name)}</strong></td>
                         <td><span class="category-tag">${this.escapeHtml(p.categoryName)}</span></td>
-                        <td>$${parseFloat(p.price).toFixed(2)}</td>
+                        <td>₹${parseFloat(p.price).toFixed(2)}</td>
                         <td><strong style="color:var(--emerald-500);">${p.currentStock}</strong></td>
-                        <td>$${(parseFloat(p.price) * p.currentStock).toFixed(2)}</td>
+                        <td>₹${(parseFloat(p.price) * p.currentStock).toFixed(2)}</td>
                     </tr>
                 `).join('');
             } else if (queryId === 'q2') {
@@ -493,7 +493,7 @@ const App = {
                 `).join('');
             } else if (queryId === 'q3') {
                 const res = await API.getStockByCategory();
-                thead.innerHTML = `<tr><th>Category ID</th><th>Category Name</th><th>Total Products (COUNT)</th><th>Total Units (SUM)</th><th>Avg Stock (AVG)</th><th>Category Valuation (SUM P*Q)</th></tr>`;
+                thead.innerHTML = `<tr><th>Category ID</th><th>Category Name</th><th>Total Products (COUNT)</th><th>Total Units (SUM)</th><th>Avg Stock (AVG)</th><th>Category Valuation (₹)</th></tr>`;
                 tbody.innerHTML = res.data.map(c => `
                     <tr>
                         <td>#${c.categoryId}</td>
@@ -501,34 +501,34 @@ const App = {
                         <td>${c.totalProducts}</td>
                         <td><strong style="color:var(--cyan-500);">${c.totalStockQuantity}</strong></td>
                         <td>${parseFloat(c.avgStockPerProduct).toFixed(1)}</td>
-                        <td>$${parseFloat(c.categoryInventoryValuation).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                        <td>₹${parseFloat(c.categoryInventoryValuation).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
                     </tr>
                 `).join('');
             } else if (queryId === 'q4') {
                 const res = await API.getAnalyticsSummary();
                 const d = res.data;
-                thead.innerHTML = `<tr><th>Total Distinct Products</th><th>Total Warehouse Units</th><th>Min Price</th><th>Max Price</th><th>Avg Price</th><th>Total Inventory Valuation</th></tr>`;
+                thead.innerHTML = `<tr><th>Total Distinct Products</th><th>Total Warehouse Units</th><th>Min Price (₹)</th><th>Max Price (₹)</th><th>Avg Price (₹)</th><th>Total Inventory Valuation (₹)</th></tr>`;
                 tbody.innerHTML = `
                     <tr>
                         <td><strong>${d.totalDistinctProducts}</strong> items</td>
                         <td><strong style="color:var(--cyan-500);">${d.totalUnitsInStock}</strong> units</td>
-                        <td>$${parseFloat(d.minProductPrice).toFixed(2)}</td>
-                        <td>$${parseFloat(d.maxProductPrice).toFixed(2)}</td>
-                        <td>$${parseFloat(d.avgProductPrice).toFixed(2)}</td>
-                        <td><strong style="color:var(--emerald-500); font-size:1.05rem;">$${parseFloat(d.totalInventoryValuation).toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong></td>
+                        <td>₹${parseFloat(d.minProductPrice).toFixed(2)}</td>
+                        <td>₹${parseFloat(d.maxProductPrice).toFixed(2)}</td>
+                        <td>₹${parseFloat(d.avgProductPrice).toFixed(2)}</td>
+                        <td><strong style="color:var(--emerald-500); font-size:1.05rem;">₹${parseFloat(d.totalInventoryValuation).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</strong></td>
                     </tr>
                 `;
             } else if (queryId === 'q5') {
                 const minCount = document.getElementById('q5-min-count').value || 2;
                 const res = await API.getCategoryProductCount(minCount);
-                thead.innerHTML = `<tr><th>Category ID</th><th>Category Name</th><th>Product Count (COUNT &ge; ${minCount})</th><th>Total Category Units</th><th>Category Valuation</th></tr>`;
+                thead.innerHTML = `<tr><th>Category ID</th><th>Category Name</th><th>Product Count (COUNT &ge; ${minCount})</th><th>Total Category Units</th><th>Category Valuation (₹)</th></tr>`;
                 tbody.innerHTML = res.data.map(c => `
                     <tr>
                         <td>#${c.categoryId}</td>
                         <td><strong>${this.escapeHtml(c.categoryName)}</strong></td>
                         <td><strong style="color:var(--primary-500);">${c.productCount}</strong></td>
                         <td>${c.totalUnitsInCategory}</td>
-                        <td>$${parseFloat(c.categoryValuation).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                        <td>₹${parseFloat(c.categoryValuation).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
                     </tr>
                 `).join('');
             }

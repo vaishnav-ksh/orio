@@ -34,6 +34,7 @@ An enterprise-grade Product Inventory Management web application built with **Ja
    - Interactive SQL Explorer in the Web UI to test queries live with dynamic parameters.
 
 5. **Modular Single-Page Dashboard**:
+   - **Currency**: **Indian Rupee (₹ / INR)** formatting across all KPI cards, products, and analytics.
    - **Themes**: **Neo-Obsidian Dark Mode** (default) and **Frost Light Mode** with a 1-click theme switcher in the sidebar.
    - **Sidebar Navigation**: Dedicated views for Products Catalog, Stock Operations, Low-Stock Alerts, SQL Analytics, and Audit Logs.
    - **Live SQLite Badge**: Displays real-time database engine status and file location.
