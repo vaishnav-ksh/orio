@@ -86,6 +86,14 @@ public class ProductResponseDto {
         this.stockQuantity = stockQuantity;
     }
 
+    public Integer getCurrentStock() {
+        return stockQuantity;
+    }
+
+    public void setCurrentStock(Integer currentStock) {
+        this.stockQuantity = currentStock;
+    }
+
     public Integer getLowStockThreshold() {
         return lowStockThreshold;
     }

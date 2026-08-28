@@ -235,11 +235,13 @@ const App = {
         }
 
         tbody.innerHTML = products.map(p => {
-            const stock = p.currentStock || 0;
+            const stock = p.stockQuantity !== undefined ? p.stockQuantity : (p.currentStock !== undefined ? p.currentStock : 0);
+            const threshold = p.lowStockThreshold !== undefined ? p.lowStockThreshold : 10;
+            
             let statusBadge = '<span class="status-badge status-in-stock">IN STOCK</span>';
             if (stock === 0) {
                 statusBadge = '<span class="status-badge status-out-of-stock">OUT OF STOCK</span>';
-            } else if (stock <= (p.lowStockThreshold || 10)) {
+            } else if (stock <= threshold) {
                 statusBadge = '<span class="status-badge status-low-stock">LOW STOCK</span>';
             }
 
