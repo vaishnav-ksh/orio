@@ -179,13 +179,17 @@ public class ProductService {
         }
 
         Inventory inventory = product.getInventory();
+        if (inventory == null && product.getId() != null) {
+            inventory = inventoryRepository.findByProductId(product.getId()).orElse(null);
+        }
+
         if (inventory != null) {
             int qty = inventory.getQuantity() != null ? inventory.getQuantity() : 0;
             int threshold = inventory.getLowStockThreshold() != null ? inventory.getLowStockThreshold() : defaultLowStockThreshold;
             dto.setStockQuantity(qty);
             dto.setLowStockThreshold(threshold);
             dto.setLastRestockedAt(inventory.getLastRestockedAt());
-            dto.setTotalValuation(product.getPrice().multiply(BigDecimal.valueOf(qty)));
+            dto.setTotalValuation(product.getPrice() != null ? product.getPrice().multiply(BigDecimal.valueOf(qty)) : BigDecimal.ZERO);
 
             if (qty == 0) {
                 dto.setStockStatus("OUT_OF_STOCK");
