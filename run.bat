@@ -4,7 +4,7 @@ set MVN_CMD="C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2025.2.2
 
 echo ==========================================================
 echo  Starting Product Inventory Management (ORIO) System...
-echo  Java: OpenJDK 25 ^| Database: In-Memory H2 (Active)
+echo  Java: OpenJDK 25 ^| Database: SQLite (./data/inventory.db)
 echo  Web UI: http://localhost:8080
 echo ==========================================================
 
