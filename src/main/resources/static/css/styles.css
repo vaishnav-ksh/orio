@@ -435,29 +435,37 @@ html, body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.45rem;
-    padding: 0.6rem 1.15rem;
-    border-radius: var(--radius-md);
+    gap: 0.5rem;
+    padding: 0.55rem 1.15rem;
+    border-radius: 10px;
     font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
     border: 1px solid transparent;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     user-select: none;
+    line-height: 1.2;
+}
+
+.btn svg {
+    flex-shrink: 0;
 }
 
 .btn-primary {
     background: var(--primary-gradient);
     color: #ffffff;
-    box-shadow: 0 4px 14px var(--primary-glow);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 12px var(--primary-glow);
 }
 
 .btn-primary:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 18px var(--primary-glow);
+    box-shadow: 0 6px 16px var(--primary-glow);
 }
 
 .btn-primary:active {
+    transform: translateY(0);
+}
     transform: translateY(0);
 }
 
