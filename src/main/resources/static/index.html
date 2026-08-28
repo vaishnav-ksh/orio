@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORIO — Product Inventory Management System</title>
+    <meta name="description" content="Enterprise Product Inventory Management application with real-time stock control, dynamic low-stock alerts, SQL analytics and REST APIs.">
+    
+    <!-- Google Fonts: Plus Jakarta Sans & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="bg-glow-orb glow-1"></div>
+    <div class="bg-glow-orb glow-2"></div>
+
+    <!-- Navigation Header -->
+    <nav class="navbar">
+        <div class="brand-container">
+            <div class="brand-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+            </div>
+            <div>
+                <span class="brand-title">ORIO Inventory</span>
+                <span class="brand-badge">v1.0.0</span>
+            </div>
+        </div>
+
+        <div class="nav-links">
+            <button class="nav-tab active" data-tab="products-tab" id="nav-products-btn">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                Products
+            </button>
+            <button class="nav-tab" data-tab="inventory-tab" id="nav-inventory-btn">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+                Stock Management
+            </button>
+            <button class="nav-tab" data-tab="low-stock-tab" id="nav-low-stock-btn">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Low Stock Alerts
+                <span class="tab-badge" id="low-stock-badge-count">0</span>
+            </button>
+            <button class="nav-tab" data-tab="analytics-tab" id="nav-analytics-btn">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                SQL & Analytics
+            </button>
+            <button class="nav-tab" data-tab="transactions-tab" id="nav-transactions-btn">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Audit Log
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+        <!-- Top Global KPI Summary Cards -->
+        <section class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon icon-products">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/></svg>
+                </div>
+                <div class="kpi-details">
+                    <span class="kpi-label">Total Catalog Products</span>
+                    <span class="kpi-value" id="kpi-total-products">0</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon icon-units">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                </div>
+                <div class="kpi-details">
+                    <span class="kpi-label">Total Units in Stock</span>
+                    <span class="kpi-value" id="kpi-total-units">0</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon icon-low">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+                <div class="kpi-details">
+                    <span class="kpi-label">Low & Out of Stock</span>
+                    <span class="kpi-value" id="kpi-low-stock">0</span>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon icon-valuation">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+                <div class="kpi-details">
+                    <span class="kpi-label">Total Inventory Value</span>
+                    <span class="kpi-value" id="kpi-total-valuation">$0.00</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 1: PRODUCT MANAGEMENT -->
+        <section id="products-tab" class="tab-content active">
+            <div class="panel-card">
+                <div class="panel-header">
+                    <div class="panel-title-group">
+                        <h2>Product Catalog</h2>
+                        <p class="panel-subtitle">Manage products, pricing, categories, and inventory configurations</p>
+                    </div>
+                    <div class="toolbar">
+                        <div class="search-input-wrap">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                            <input type="text" id="product-search-input" class="form-control" placeholder="Search by name, SKU, desc...">
+                        </div>
+                        <select id="product-category-filter" class="form-select" style="min-width: 160px;">
+                            <option value="">All Categories</option>
+                        </select>
+                        <button class="btn btn-primary" id="open-create-product-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Add Product
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="custom-table" id="products-table">
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Product Details</th>
+                                <th>Category</th>
+                                <th>Unit Price</th>
+                                <th>Current Stock</th>
+                                <th>Status</th>
+                                <th>Total Value</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-table-body">
+                            <!-- Populated dynamically by app.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: INVENTORY & STOCK OPERATIONS -->
+        <section id="inventory-tab" class="tab-content">
+            <div class="panel-card">
+                <div class="panel-header">
+                    <div class="panel-title-group">
+                        <h2>Stock Inventory & Fast Operations</h2>
+                        <p class="panel-subtitle">Execute Stock-In and Stock-Out operations with instantaneous live validation</p>
+                    </div>
+                    <div class="toolbar">
+                        <button class="btn btn-secondary btn-sm" id="refresh-inventory-btn">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="custom-table" id="inventory-table">
+                        <thead>
+                            <tr>
+                                <th>Product / SKU</th>
+                                <th>Category</th>
+                                <th>Available Stock</th>
+                                <th>Low Stock Threshold</th>
+                                <th>Status</th>
+                                <th>Last Restocked</th>
+                                <th style="text-align: right;">Quick Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-table-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: LOW STOCK ALERTS -->
+        <section id="low-stock-tab" class="tab-content">
+            <div class="panel-card">
+                <div class="panel-header">
+                    <div class="panel-title-group">
+                        <h2>Low Stock & Replenishment Monitor</h2>
+                        <p class="panel-subtitle">Real-time alerts for products at or below their configured reorder threshold</p>
+                    </div>
+                    <div class="toolbar">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <label class="form-label" style="margin: 0;">Filter Threshold &le;</label>
+                            <input type="number" id="custom-low-stock-threshold" class="form-control" style="width: 90px;" placeholder="Custom" min="0">
+                            <button class="btn btn-secondary btn-sm" id="apply-custom-threshold-btn">Filter</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="custom-table" id="low-stock-table">
+                        <thead>
+                            <tr>
+                                <th>SKU</th>
+                                <th>Product</th>
+                                <th>Category</th>
+                                <th>Current Quantity</th>
+                                <th>Threshold</th>
+                                <th>Deficit</th>
+                                <th>Status</th>
+                                <th style="text-align: right;">Restock</th>
+                            </tr>
+                        </thead>
+                        <tbody id="low-stock-table-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: SQL & ANALYTICS EXPLORER -->
+        <section id="analytics-tab" class="tab-content">
+            <div class="panel-card">
+                <div class="panel-header">
+                    <div class="panel-title-group">
+                        <h2>SQL & Inventory Analytics Explorer</h2>
+                        <p class="panel-subtitle">Real-time execution of the 5 required SQL queries (JOIN, GROUP BY, HAVING, ORDER BY, COUNT, SUM)</p>
+                    </div>
+                </div>
+
+                <!-- Query 1 -->
+                <div class="sql-query-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="font-size: 1.05rem; font-weight: 600; color: #818cf8;">Query 1: Products with Available Stock</h3>
+                        <button class="btn btn-secondary btn-sm" id="run-query-1-btn">Execute Query</button>
+                    </div>
+                    <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 4px;">
+                        Demonstrates <code>JOIN products, categories, inventories WHERE quantity &gt; 0 ORDER BY quantity DESC</code>
+                    </p>
+                    <div class="sql-code-block">SELECT p.id, p.sku, p.name, c.name AS category_name, p.price, i.quantity AS available_stock
+FROM products p
+INNER JOIN categories c ON p.category_id = c.id
+INNER JOIN inventories i ON p.id = i.product_id
+WHERE i.quantity &gt; 0
+ORDER BY i.quantity DESC;</div>
+                    <div id="query-1-results" style="margin-top: 1rem;"></div>
+                </div>
+
+                <!-- Query 3: Stock by Category -->
+                <div class="sql-query-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="font-size: 1.05rem; font-weight: 600; color: #38bdf8;">Query 3: Stock by Category (Aggregation)</h3>
+                        <button class="btn btn-secondary btn-sm" id="run-query-3-btn">Execute Query</button>
+                    </div>
+                    <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 4px;">
+                        Demonstrates <code>GROUP BY category_id, name</code> with <code>COUNT(p.id)</code>, <code>SUM(i.quantity)</code>, <code>AVG(i.quantity)</code>, <code>SUM(price * quantity)</code>
+                    </p>
+                    <div class="sql-code-block">SELECT c.id AS category_id, c.name AS category_name,
+       COUNT(p.id) AS total_products,
+       SUM(i.quantity) AS total_stock_quantity,
+       AVG(i.quantity) AS avg_stock_per_product,
+       SUM(p.price * i.quantity) AS category_inventory_valuation
+FROM categories c
+LEFT JOIN products p ON c.id = p.category_id
+LEFT JOIN inventories i ON p.id = i.product_id
+GROUP BY c.id, c.name
+ORDER BY total_stock_quantity DESC;</div>
+                    <div id="query-3-results" style="margin-top: 1rem;"></div>
+                </div>
+
+                <!-- Query 5: Categories with > N Products -->
+                <div class="sql-query-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="font-size: 1.05rem; font-weight: 600; color: #34d399;">Query 5: Categories Containing More Than N Products</h3>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <label style="font-size: 0.82rem; color: var(--text-secondary);">Min Products:</label>
+                            <input type="number" id="min-products-count-input" class="form-control" style="width: 70px; padding: 0.3rem 0.5rem;" value="3" min="1">
+                            <button class="btn btn-secondary btn-sm" id="run-query-5-btn">Execute Query</button>
+                        </div>
+                    </div>
+                    <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 4px;">
+                        Demonstrates <code>GROUP BY c.id, c.name HAVING COUNT(p.id) &gt;= :minCount</code>
+                    </p>
+                    <div class="sql-code-block">SELECT c.id AS category_id, c.name AS category_name,
+       COUNT(p.id) AS product_count,
+       SUM(i.quantity) AS total_units_in_category,
+       SUM(p.price * i.quantity) AS category_valuation
+FROM categories c
+INNER JOIN products p ON c.id = p.category_id
+INNER JOIN inventories i ON p.id = i.product_id
+GROUP BY c.id, c.name
+HAVING COUNT(p.id) &gt;= :minCount
+ORDER BY product_count DESC;</div>
+                    <div id="query-5-results" style="margin-top: 1rem;"></div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- TAB 5: TRANSACTION AUDIT LOG -->
+        <section id="transactions-tab" class="tab-content">
+            <div class="panel-card">
+                <div class="panel-header">
+                    <div class="panel-title-group">
+                        <h2>Stock Transactions Audit Log</h2>
+                        <p class="panel-subtitle">Immutable audit trail of all historical Stock-In and Stock-Out operations</p>
+                    </div>
+                    <div class="toolbar">
+                        <button class="btn btn-secondary btn-sm" id="refresh-transactions-btn">Refresh Log</button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="custom-table" id="transactions-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Product / SKU</th>
+                                <th>Action</th>
+                                <th>Quantity Changed</th>
+                                <th>Stock Before &rarr; After</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactions-table-body">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- MODAL: ADD / EDIT PRODUCT -->
+    <div class="modal-overlay" id="product-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title" id="product-modal-title">Create New Product</h3>
+                <button class="modal-close" id="close-product-modal">&times;</button>
+            </div>
+            <form id="product-form">
+                <div class="modal-body">
+                    <input type="hidden" id="form-product-id">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="form-sku">SKU Code *</label>
+                            <input type="text" id="form-sku" class="form-control" placeholder="e.g. ELEC-PRO-01" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="form-category">Category *</label>
+                            <select id="form-category" class="form-select" required></select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="form-name">Product Name *</label>
+                        <input type="text" id="form-name" class="form-control" placeholder="e.g. Ergonomic Keyboard" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="form-description">Description</label>
+                        <textarea id="form-description" class="form-control" rows="2" placeholder="Optional product details..."></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="form-price">Price ($) * (Cannot be negative)</label>
+                            <input type="number" id="form-price" class="form-control" step="0.01" min="0" placeholder="0.00" required>
+                        </div>
+                        <div class="form-group" id="form-initial-stock-group">
+                            <label class="form-label" for="form-initial-stock">Initial Stock (Min 0)</label>
+                            <input type="number" id="form-initial-stock" class="form-control" min="0" value="0">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="form-low-threshold">Low-Stock Alert Threshold</label>
+                        <input type="number" id="form-low-threshold" class="form-control" min="0" value="10">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancel-product-modal-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="save-product-btn">Save Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: STOCK-IN OPERATION -->
+    <div class="modal-overlay" id="stock-in-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title" style="color: #34d399;">Stock-In (Receive Inventory)</h3>
+                <button class="modal-close" id="close-stock-in-modal">&times;</button>
+            </div>
+            <form id="stock-in-form">
+                <div class="modal-body">
+                    <input type="hidden" id="stock-in-product-id">
+                    <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid var(--success-border); padding: 0.85rem; border-radius: var(--radius-md);">
+                        <div style="font-weight: 600;" id="stock-in-product-name">Product Name</div>
+                        <div style="font-size: 0.82rem; color: var(--text-secondary);">SKU: <span id="stock-in-product-sku"></span> | Current Stock: <strong id="stock-in-current-stock" style="color: #34d399;">0</strong></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="stock-in-qty">Quantity to Add * (Min 1)</label>
+                        <input type="number" id="stock-in-qty" class="form-control" min="1" placeholder="Enter quantity" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="stock-in-notes">Notes / PO Reference</label>
+                        <input type="text" id="stock-in-notes" class="form-control" placeholder="e.g. Shipment received from Supplier">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancel-stock-in-btn">Cancel</button>
+                    <button type="submit" class="btn btn-success" id="submit-stock-in-btn">Confirm Stock-In</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: STOCK-OUT OPERATION -->
+    <div class="modal-overlay" id="stock-out-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title" style="color: #f87171;">Stock-Out (Dispatch Inventory)</h3>
+                <button class="modal-close" id="close-stock-out-modal">&times;</button>
+            </div>
+            <form id="stock-out-form">
+                <div class="modal-body">
+                    <input type="hidden" id="stock-out-product-id">
+                    <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid var(--danger-border); padding: 0.85rem; border-radius: var(--radius-md);">
+                        <div style="font-weight: 600;" id="stock-out-product-name">Product Name</div>
+                        <div style="font-size: 0.82rem; color: var(--text-secondary);">SKU: <span id="stock-out-product-sku"></span> | Available Stock: <strong id="stock-out-current-stock" style="color: #f87171;">0</strong></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="stock-out-qty">Quantity to Dispatch * (Cannot exceed available stock)</label>
+                        <input type="number" id="stock-out-qty" class="form-control" min="1" placeholder="Enter quantity" required>
+                        <span id="stock-out-error-hint" class="form-error" style="display: none;">Cannot exceed available stock!</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="stock-out-notes">Order / Reason</label>
+                        <input type="text" id="stock-out-notes" class="form-control" placeholder="e.g. Customer order #1042">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancel-stock-out-btn">Cancel</button>
+                    <button type="submit" class="btn btn-danger" id="submit-stock-out-btn">Confirm Stock-Out</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CONFIGURE LOW STOCK THRESHOLD -->
+    <div class="modal-overlay" id="threshold-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title">Configure Low-Stock Threshold</h3>
+                <button class="modal-close" id="close-threshold-modal">&times;</button>
+            </div>
+            <form id="threshold-form">
+                <div class="modal-body">
+                    <input type="hidden" id="threshold-product-id">
+                    <div style="font-weight: 600;" id="threshold-product-name">Product Name</div>
+                    <div class="form-group" style="margin-top: 0.5rem;">
+                        <label class="form-label" for="threshold-value">Alert Threshold (Units)</label>
+                        <input type="number" id="threshold-value" class="form-control" min="0" required>
+                        <small style="color: var(--text-muted); font-size: 0.78rem;">When stock drops below or equals this number, it will be flagged as Low Stock.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancel-threshold-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="save-threshold-btn">Update Threshold</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATIONS CONTAINER -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Application JavaScript -->
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
