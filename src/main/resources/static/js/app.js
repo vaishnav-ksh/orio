@@ -314,7 +314,7 @@ const App = {
                     <td class="text-right">
                         <div class="table-actions">
                             <button class="btn btn-success-soft btn-sm" onclick="App.openStockOpModal(${i.productId}, '${this.escapeHtml(i.productName)}', '${this.escapeHtml(i.productSku)}', ${stock}, 'STOCK_IN')">+ Stock In</button>
-                            <button class="btn btn-danger-soft btn-sm" onclick="App.openStockOpModal(${i.productId}, '${this.escapeHtml(i.productName)}', '${this.escapeHtml(i.productSku)}', ${stock}, 'STOCK_OUT')">- Stock Out</button>
+                            <button class="btn btn-danger-soft btn-sm" ${stock === 0 ? 'disabled style="opacity: 0.45; cursor: not-allowed;" title="Out of stock — Cannot dispatch"' : ''} onclick="App.openStockOpModal(${i.productId}, '${this.escapeHtml(i.productName)}', '${this.escapeHtml(i.productSku)}', ${stock}, 'STOCK_OUT')">- Stock Out</button>
                         </div>
                     </td>
                 </tr>
@@ -629,20 +629,66 @@ const App = {
         const modalTitle = document.getElementById('stock-op-modal-title');
         const qtyLabel = document.getElementById('stock-op-quantity-label');
         const submitBtn = document.getElementById('btn-submit-stock-op');
+        const qtyInput = document.getElementById('stock-op-quantity');
+        const warningHint = document.getElementById('stock-op-warning-hint');
+
+        warningHint.style.display = 'none';
+        warningHint.textContent = '';
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        submitBtn.style.cursor = 'pointer';
 
         if (type === 'STOCK_IN') {
             modalTitle.textContent = 'Stock-In (Replenish Inventory)';
             qtyLabel.innerHTML = 'Quantity to Add <span class="required">*</span>';
             submitBtn.textContent = 'Confirm Stock-In';
             submitBtn.className = 'btn btn-primary';
+            qtyInput.min = 1;
+            qtyInput.max = 999999;
+            qtyInput.value = 10;
         } else {
             modalTitle.textContent = 'Stock-Out (Dispatch Inventory)';
             qtyLabel.innerHTML = 'Quantity to Dispatch <span class="required">* (Max ' + currentStock + ')</span>';
             submitBtn.textContent = 'Confirm Stock-Out';
             submitBtn.className = 'btn btn-danger-soft';
+            qtyInput.min = 1;
+            qtyInput.max = currentStock;
+            qtyInput.value = currentStock > 0 ? 1 : 0;
+
+            if (currentStock === 0) {
+                warningHint.style.display = 'block';
+                warningHint.textContent = '⚠️ This product is currently out of stock (0 units). Stock-out cannot be performed.';
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.5';
+                submitBtn.style.cursor = 'not-allowed';
+            }
         }
 
-        document.getElementById('stock-op-quantity').value = 1;
+        // Live validation on quantity input
+        qtyInput.oninput = () => {
+            if (type === 'STOCK_OUT') {
+                const requested = parseInt(qtyInput.value, 10) || 0;
+                if (requested > currentStock) {
+                    warningHint.style.display = 'block';
+                    warningHint.textContent = `⚠️ Requested quantity (${requested}) exceeds available stock (${currentStock})!`;
+                    submitBtn.disabled = true;
+                    submitBtn.style.opacity = '0.5';
+                    submitBtn.style.cursor = 'not-allowed';
+                } else if (requested <= 0) {
+                    warningHint.style.display = 'block';
+                    warningHint.textContent = '⚠️ Quantity must be at least 1.';
+                    submitBtn.disabled = true;
+                    submitBtn.style.opacity = '0.5';
+                    submitBtn.style.cursor = 'not-allowed';
+                } else {
+                    warningHint.style.display = 'none';
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
+                    submitBtn.style.cursor = 'pointer';
+                }
+            }
+        };
+
         document.getElementById('stock-op-notes').value = '';
         document.getElementById('stock-op-modal').classList.add('active');
     },

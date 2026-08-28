@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     
     <!-- Stylesheet with cache buster -->
-    <link rel="stylesheet" href="css/styles.css?v=2.7">
+    <link rel="stylesheet" href="css/styles.css?v=2.8">
 </head>
 <body>
     <div class="ambient-glow glow-top-left"></div>
@@ -530,6 +530,7 @@ ORDER BY i.quantity DESC, p.name ASC;</code></pre>
                 <div class="form-group">
                     <label for="stock-op-quantity" id="stock-op-quantity-label">Quantity to Add <span class="required">*</span></label>
                     <input type="number" id="stock-op-quantity" min="1" value="1" required>
+                    <div id="stock-op-warning-hint" style="display: none; font-size: 0.78rem; color: var(--rose-500); font-weight: 600; margin-top: 0.35rem;"></div>
                 </div>
 
                 <div class="form-group">
@@ -549,7 +550,7 @@ ORDER BY i.quantity DESC, p.name ASC;</code></pre>
     <div class="toast-container" id="toast-container"></div>
 
     <!-- Scripts with cache busters -->
-    <script src="js/api.js?v=2.7"></script>
-    <script src="js/app.js?v=2.7"></script>
+    <script src="js/api.js?v=2.8"></script>
+    <script src="js/app.js?v=2.8"></script>
 </body>
 </html>
