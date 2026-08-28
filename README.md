@@ -1,12 +1,12 @@
 # 📦 Product Inventory Management System (ORIO)
 
-An enterprise-grade Product Inventory Management web application built with **Java 17+**, **Spring Boot 3**, **Spring Data JPA**, supporting **PostgreSQL / MySQL / H2**, a reactive **HTML5 / CSS3 / JavaScript** frontend, and automated **JUnit 5** test suites.
+An enterprise-grade Product Inventory Management web application built with **Java 17+**, **Spring Boot 3**, **Spring Data JPA**, **SQLite (Persistent by Default)**, **PostgreSQL / MySQL / H2**, a reactive **HTML5 / CSS3 / JavaScript** modular dashboard, containerized with **Docker**, and covered by automated **JUnit 5** test suites.
 
 ---
 
 ## 🌟 Key Features
 
-1. **Product Management**:
+1. **Product Catalog & Management**:
    - Create, Read, Update, Delete (CRUD) catalog items with SKU, categories, prices, and descriptions.
    - **Business Rule Enforcement**: Product price cannot be negative (`price >= 0.00`).
    - SKU uniqueness guarantees across all products.
@@ -16,21 +16,22 @@ An enterprise-grade Product Inventory Management web application built with **Ja
    - **Stock-Out**: Safe inventory dispatch (`POST /api/inventory/{productId}/stock-out`).
    - **Business Rules Enforcement**:
      - Stock cannot become negative (`quantity >= 0`).
-     - Stock-out quantity cannot exceed available stock (returns `HTTP 400 Bad Request` with custom `InsufficientStockException`).
+     - Stock-out quantity cannot exceed available stock (returns `HTTP 400 Bad Request` with structured `InsufficientStockException`).
    - **Configurable Low-Stock Threshold**: Per-product and global threshold configurations.
 
 3. **Real-Time Low-Stock Monitor**:
    - Instant visual alerts for items whose quantity is at or below the configured reorder threshold.
-   - Dynamic deficit calculation and one-click restock workflow.
+   - Dynamic deficit calculation (`threshold - current_stock`) and one-click restock workflow.
 
-4. **Analytical SQL Engine**:
+4. **Analytical SQL Engine (Required SQL Tasks)**:
    - Executes complex queries using `JOIN`, `GROUP BY`, `HAVING`, `ORDER BY`, `COUNT`, and `SUM` across products, categories, inventories, and transaction tables.
-   - Live web interface explorer to run and inspect query results interactively.
+   - Interactive SQL Explorer in the Web UI to test queries live with dynamic parameters.
 
-5. **Modern Single-Page UI**:
-   - Dark-mode glassmorphic interface with Google Fonts (*Plus Jakarta Sans*, *Outfit*, *JetBrains Mono*).
-   - Asynchronous API communication (`async/await fetch`) with live DOM updates (no full page reload).
-   - Floating animated toast notifications and real-time validation error handling.
+5. **Modular Single-Page Dashboard**:
+   - **Themes**: **Neo-Obsidian Dark Mode** (default) and **Frost Light Mode** with a 1-click theme switcher in the sidebar.
+   - **Sidebar Navigation**: Dedicated views for Products Catalog, Stock Operations, Low-Stock Alerts, SQL Analytics, and Audit Logs.
+   - **Live SQLite Badge**: Displays real-time database engine status and file location.
+   - **Toast Notifications**: Micro-animated feedback for successful updates and validation errors.
 
 ---
 
@@ -39,15 +40,17 @@ An enterprise-grade Product Inventory Management web application built with **Ja
 | Layer | Technology |
 |---|---|
 | **Backend Framework** | Spring Boot 3.3.4 (Java 17 / Java 21 / Java 25) |
-| **ORM / Data Access** | Spring Data JPA / Hibernate 6 |
-| **Databases** | PostgreSQL 15+, MySQL 8+, H2 Database (In-Memory default) |
+| **ORM / Data Access** | Spring Data JPA / Hibernate 6 (Hibernate Community Dialects) |
+| **Default Database** | **SQLite** (`./data/inventory.db` — persistent on hard disk) |
+| **Alternative Databases** | PostgreSQL 15+, MySQL 8+, H2 In-Memory (profile-activated) |
 | **Frontend** | Semantic HTML5, Vanilla CSS3 (Custom Properties & Glassmorphism), Vanilla JavaScript ES6+ |
-| **Testing** | JUnit 5, AssertJ, Spring MockMvc |
+| **Testing** | JUnit 5, AssertJ, Spring MockMvc (25/25 tests passing) |
+| **Containerization** | Docker, Docker Compose (Multi-stage Eclipse Temurin 17 Alpine) |
 | **Build Tool** | Apache Maven 3.9+ |
 
 ---
 
-## 📐 Database Schema & SQL Architecture
+## 📁 Database Schema & SQL Architecture
 
 ### Table Definitions & Constraints
 - **`categories`**: `id (PK)`, `name (UNIQUE)`, `description`, `created_at`, `updated_at`.
@@ -55,7 +58,7 @@ An enterprise-grade Product Inventory Management web application built with **Ja
 - **`inventories`**: `id (PK)`, `product_id (FK, UNIQUE)`, `quantity (CHECK >= 0)`, `low_stock_threshold (CHECK >= 0)`, `last_restocked_at`.
 - **`stock_transactions`**: `id (PK)`, `product_id (FK)`, `transaction_type (STOCK_IN / STOCK_OUT)`, `quantity (CHECK > 0)`, `previous_stock`, `new_stock`, `notes`, `transaction_time`.
 
-### Required Analytical Queries (`src/main/resources/db/queries.sql`)
+### Required Analytical SQL Tasks (`src/main/resources/db/queries.sql`)
 
 #### 1. Products with Available Stock
 ```sql
@@ -66,7 +69,8 @@ SELECT
     c.name AS category_name,
     p.price,
     i.quantity AS available_stock,
-    (p.price * i.quantity) AS total_item_value
+    (p.price * i.quantity) AS total_item_value,
+    i.last_restocked_at
 FROM products p
 INNER JOIN categories c ON p.category_id = c.id
 INNER JOIN inventories i ON p.id = i.product_id
@@ -74,7 +78,7 @@ WHERE i.quantity > 0
 ORDER BY i.quantity DESC, p.name ASC;
 ```
 
-#### 2. Low-Stock Products
+#### 2. Low-Stock Products & Deficit Analysis
 ```sql
 SELECT 
     p.id AS product_id,
@@ -93,7 +97,7 @@ WHERE i.quantity <= i.low_stock_threshold
 ORDER BY i.quantity ASC, p.name ASC;
 ```
 
-#### 3. Stock by Category (Aggregation)
+#### 3. Stock by Category (Aggregation with GROUP BY & SUM)
 ```sql
 SELECT 
     c.id AS category_id,
@@ -122,7 +126,7 @@ FROM products p
 INNER JOIN inventories i ON p.id = i.product_id;
 ```
 
-#### 5. Categories Containing More Than a Specified Number of Products
+#### 5. Categories Containing More Than a Specified Number of Products (HAVING Clause)
 ```sql
 SELECT 
     c.id AS category_id,
@@ -149,7 +153,7 @@ ORDER BY product_count DESC;
 | `GET` | `/api/products/{id}` | Get product details by ID |
 | `POST` | `/api/products` | Create a new product (validates non-negative price, SKU) |
 | `PUT` | `/api/products/{id}` | Update product details |
-| `DELETE` | `/api/products/{id}` | Delete a product |
+| `DELETE` | `/api/products/{id}` | Delete a product and its inventory |
 
 ### Inventory API
 | Method | Endpoint | Description |
@@ -173,39 +177,54 @@ ORDER BY product_count DESC;
 
 ---
 
-## 🧪 Testing
+## 🐳 Docker Deployment
 
-The test suite includes 25 unit and integration tests covering all critical business rules:
-- **`ProductValidationTest`**: Verifies rejection of negative price, negative initial stock, and duplicate SKU.
-- **`InventoryServiceTest`**: Verifies stock-in increments, stock-out decrements, rejection of excessive stock-out (`InsufficientStockException`), zero stock transitions, and threshold updates.
-- **`ProductControllerTest`**: MockMvc tests for product REST APIs and validation error responses.
-- **`InventoryControllerTest`**: MockMvc tests for stock-in, stock-out, 400 Bad Request error payloads, and low-stock queries.
-- **`AnalyticsServiceTest`**: Tests all 5 analytical SQL queries for correct aggregation and order.
+The application includes a production-ready, multi-stage **`Dockerfile`** (~180MB) and **`docker-compose.yml`** with persistent volume mounts.
 
-### Running Tests:
+### 1. Run with Docker Compose (Single Command):
 ```bash
-mvn test
+docker compose up --build -d
+```
+
+### 2. Run with Docker CLI:
+```bash
+# Build Docker image
+docker build -t orio-inventory:latest .
+
+# Run with persistent volume
+docker run -d -p 8080:8080 -v ${PWD}/data:/app/data --name orio-app orio-inventory:latest
 ```
 
 ---
 
-## 🏃 Running the Application
+## ☁️ Free Cloud Deployment Guides
 
-### 1. Prerequisites
-- Java 17 or higher
-- Maven 3.8+
+### Option A: Render.com (100% Free)
+1. Push repository to GitHub.
+2. Sign in to [Render.com](https://render.com) and click **"New +"** &rarr; **"Web Service"**.
+3. Select your GitHub repository.
+4. Render will automatically detect the **`Dockerfile`**. Select the **Free** tier and click **"Deploy"**.
 
-### 2. Start Application
-```bash
-mvn spring-boot:run
+### Option B: Koyeb.com (Free Tier)
+1. Sign in to [Koyeb.com](https://koyeb.com).
+2. Create a new service from your GitHub repo using the `Dockerfile` on the free nano tier.
+
+---
+
+## 🏃 Local Development & Execution
+
+### 1. Run Application
+```powershell
+# In PowerShell:
+.\run.ps1
+
+# Or in Command Prompt:
+run.bat
 ```
-*(Runs with in-memory H2 database and pre-seeded sample data out of the box)*
+Open **[http://localhost:8080](http://localhost:8080)** in your browser.
 
-### 3. PostgreSQL Mode (Optional)
-```bash
-mvn spring-boot:run -Dspring-boot.run.profiles=postgres
+### 2. Run Automated Test Suite
+```powershell
+.\test.ps1
 ```
-
-### 4. Access the Application
-- **Web UI**: [http://localhost:8080](http://localhost:8080)
-- **H2 Console**: [http://localhost:8080/h2-console](http://localhost:8080/h2-console) (JDBC URL: `jdbc:h2:mem:inventorydb`, User: `sa`, Password: empty)
+*(Runs 25 automated JUnit 5 tests covering business logic, controller endpoints, validation rejections, and SQL query aggregations).*
