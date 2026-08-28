@@ -4,6 +4,12 @@ An enterprise-grade Product Inventory Management web application built with **Ja
 
 ---
 
+## 🌐 Live Public Demo
+- **Live URL**: **[https://9ec43a7f919fc2.lhr.life](https://9ec43a7f919fc2.lhr.life)**
+- **Local URL**: `http://localhost:8080`
+
+---
+
 ## 🌟 Key Features
 
 1. **Product Catalog & Management**:
