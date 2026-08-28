@@ -4,7 +4,7 @@
 
 const API_BASE = '/api';
 
-const Api = {
+const API = {
     async request(url, options = {}) {
         const defaultOptions = {
             headers: {
@@ -97,21 +97,28 @@ const Api = {
         return this.request(`${API_BASE}/inventory/${productId}`);
     },
 
-    stockIn(productId, quantity, notes = '') {
+    stockIn(productId, data) {
+        const bodyData = typeof data === 'object' ? data : { quantity: Number(data) };
         return this.request(`${API_BASE}/inventory/${productId}/stock-in`, {
             method: 'POST',
-            body: JSON.stringify({ quantity: Number(quantity), notes })
+            body: JSON.stringify(bodyData)
         });
     },
 
-    stockOut(productId, quantity, notes = '') {
+    stockOut(productId, data) {
+        const bodyData = typeof data === 'object' ? data : { quantity: Number(data) };
         return this.request(`${API_BASE}/inventory/${productId}/stock-out`, {
             method: 'POST',
-            body: JSON.stringify({ quantity: Number(quantity), notes })
+            body: JSON.stringify(bodyData)
         });
     },
 
     getLowStock(threshold = null) {
+        const qs = threshold !== null && threshold !== '' ? `?threshold=${threshold}` : '';
+        return this.request(`${API_BASE}/inventory/low-stock${qs}`);
+    },
+
+    getLowStockProducts(threshold = null) {
         const qs = threshold !== null && threshold !== '' ? `?threshold=${threshold}` : '';
         return this.request(`${API_BASE}/inventory/low-stock${qs}`);
     },
@@ -127,6 +134,10 @@ const Api = {
     },
 
     // Analytics API (SQL Tasks)
+    getAnalyticsSummary() {
+        return this.request(`${API_BASE}/analytics/summary`);
+    },
+
     getSummary() {
         return this.request(`${API_BASE}/analytics/summary`);
     },
@@ -135,12 +146,16 @@ const Api = {
         return this.request(`${API_BASE}/analytics/stock-by-category`);
     },
 
+    getAvailableStock() {
+        return this.request(`${API_BASE}/analytics/available-stock`);
+    },
+
     getAvailableStockProducts() {
         return this.request(`${API_BASE}/analytics/available-stock`);
     },
 
-    getLowStockProducts() {
-        return this.request(`${API_BASE}/analytics/low-stock-products`);
+    getCategoryProductCount(minCount = 2) {
+        return this.request(`${API_BASE}/analytics/category-product-count?minCount=${minCount}`);
     },
 
     getCategoriesByMinProducts(minCount = 2) {
@@ -148,4 +163,7 @@ const Api = {
     }
 };
 
-window.Api = Api;
+// Global aliases to ensure compatibility with any casing
+window.API = API;
+const Api = API;
+window.Api = API;
